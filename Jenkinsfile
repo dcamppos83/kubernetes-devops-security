@@ -19,5 +19,12 @@ pipeline {
               }
             }
         }
+      stage('Docker Build and Push') {
+            steps {
+              sh 'printenv'
+              sh 'docker build -t dcamppos83/numeric-app:""$GIT_COMMIT"" .'
+              sh 'docker push dcamppos83/numeric-app:""$GIT_COMMIT""'
+            }
+        }
     }
 }
