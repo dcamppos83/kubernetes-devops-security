@@ -5,7 +5,7 @@ pipeline {
     deploymentName = "devsecops"
     containerName = "devsecops-container"
     serviceName = "devsecops-svc"
-    imageName = "dcamppos83/numeric-appp:${GIT_COMMIT}"
+    imageName = 'dcamppos83/numeric-app:""$GIT_COMMIT""'
     applicationURL = "http://devsecops-demo39.eastus.cloudapp.azure.com/"
     applicationURI = "/increment/99"
   }
@@ -106,6 +106,7 @@ pipeline {
           parallel(
             "Deployment": {
               withKubeConfig([credentialsId: 'kubeconfig']) {
+                sh 'echo "$imageName"'
                 sh "bash k8s-deployment.sh"
               }
             },
