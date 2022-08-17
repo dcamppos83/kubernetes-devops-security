@@ -1,3 +1,5 @@
+@Library('slack') _
+
 pipeline {
   agent any
 
@@ -144,5 +146,19 @@ pipeline {
               }
             }
        }
+    }
+    post {
+      always {
+        // Use sendNotifications.groovy from shared library and provide current build result as parameter    
+        sendNotification currentBuild.result
+      }
+
+    // success {
+
+    // }
+
+    // failure {
+
+    // }
     }
 }
