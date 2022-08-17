@@ -69,15 +69,15 @@ pipeline {
     //     )
     //   }
     // }
-      stage('Docker Build and Push') {
-            steps {
-              withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
-                sh 'printenv'
-                sh 'sudo docker build -t dcamppos83/numeric-app:""$GIT_COMMIT"" .'
-                sh 'docker push dcamppos83/numeric-app:""$GIT_COMMIT""'
-              }
-            }
-       }
+      // stage('Docker Build and Push') {
+      //       steps {
+      //         withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
+      //           sh 'printenv'
+      //           sh 'sudo docker build -t dcamppos83/numeric-app:""$GIT_COMMIT"" .'
+      //           sh 'docker push dcamppos83/numeric-app:""$GIT_COMMIT""'
+      //         }
+      //       }
+      //  }
       // stage('Vulnerability Scan - Kubernetes') {
       //    steps {
       //     parallel(
@@ -101,51 +101,51 @@ pipeline {
       //         }
       //       }
       //  }
-       stage('K8S Deployment - DEV') {
-         steps {
-          parallel(
-            "Deployment": {
-              withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh 'echo $imageName'
-                sh "bash k8s-deployment.sh"
-              }
-            },
-            "Rollout Status": {
-              withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh "bash k8s-deployment-rollout-status.sh"
-              }
-            }
-          )
-        }
-       }
-       stage('Integration Tests - DEV') {
-         steps {
-          script{
-            try {
-              withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh 'bash integration-test.sh'
-              }
-            } catch (e) {
-              withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh "kubectl -n default rollout undo deploy ${deploymentName}"
-              }
-              throw e
-            }
-          }
-        }
-       }
-       stage('OWASP ZAP - DAST') {
-            steps {
-              withKubeConfig([credentialsId: 'kubeconfig']) {
-                sh 'bash zap.sh'
-              }
-            }
-            post {
-              always {
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'owasp-zap-report', reportFiles: 'zap_report.html', reportName: 'OWASP ZAP HTML Report', reportTitles: 'OWASP ZAP HTML Report'])
-              }
-            }
-       }
+      //  stage('K8S Deployment - DEV') {
+      //    steps {
+      //     parallel(
+      //       "Deployment": {
+      //         withKubeConfig([credentialsId: 'kubeconfig']) {
+      //           sh 'echo $imageName'
+      //           sh "bash k8s-deployment.sh"
+      //         }
+      //       },
+      //       "Rollout Status": {
+      //         withKubeConfig([credentialsId: 'kubeconfig']) {
+      //           sh "bash k8s-deployment-rollout-status.sh"
+      //         }
+      //       }
+      //     )
+      //   }
+      //  }
+      //  stage('Integration Tests - DEV') {
+      //    steps {
+      //     script{
+      //       try {
+      //         withKubeConfig([credentialsId: 'kubeconfig']) {
+      //           sh 'bash integration-test.sh'
+      //         }
+      //       } catch (e) {
+      //         withKubeConfig([credentialsId: 'kubeconfig']) {
+      //           sh "kubectl -n default rollout undo deploy ${deploymentName}"
+      //         }
+      //         throw e
+      //       }
+      //     }
+      //   }
+      //  }
+      //  stage('OWASP ZAP - DAST') {
+      //       steps {
+      //         withKubeConfig([credentialsId: 'kubeconfig']) {
+      //           sh 'bash zap.sh'
+      //         }
+      //       }
+      //       post {
+      //         always {
+      //           publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'owasp-zap-report', reportFiles: 'zap_report.html', reportName: 'OWASP ZAP HTML Report', reportTitles: 'OWASP ZAP HTML Report'])
+      //         }
+      //       }
+      //  }
        stage('Promote to PROD') {
         steps {
           timeout(time: 2, unit: 'DAYS') {
